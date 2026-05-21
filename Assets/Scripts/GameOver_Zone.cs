@@ -6,7 +6,7 @@ public class GameOver_Zone : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ball"))
         {
-            Debug.Log("Game Over!");
+            GameManager.Instance.GameOver();
         }
     }
 }
