@@ -6,7 +6,7 @@ public class GameOver_Zone : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ball"))
         {
-            GameManager.Instance.GameOver();
+            GameManager.Instance.LoseLife();
         }
     }
 }

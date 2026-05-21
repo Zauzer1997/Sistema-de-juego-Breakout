@@ -9,7 +9,7 @@ public class Ball_Controller : MonoBehaviour
 
 
     [SerializeField] private Transform playerTransform;
-    [SerializeField] private float minHorizontalSpeed = 0.5f;
+    [SerializeField] private float minHorizontalSpeed = 0.8f;
     [SerializeField] private float speed = 8f;
     
     void Awake()
@@ -47,19 +47,42 @@ public class Ball_Controller : MonoBehaviour
         ballRb.linearVelocity = ballRb.linearVelocity.normalized * speed;
 
 
-        FixVerticalMovement();
+        PreventStuckMovement();
     }
 
-    private void FixVerticalMovement()
+    private void PreventStuckMovement()
     {
-        if (Mathf.Abs(ballRb.linearVelocity.x) < minHorizontalSpeed)
+        Vector2 velocity = ballRb.linearVelocity;
+
+        
+        if (Mathf.Abs(velocity.x) < minHorizontalSpeed)
         {
             float randomX = Random.Range(-1f, 1f);
 
-            Vector2 fixedDirection = new Vector2(randomX, ballRb.linearVelocity.y).normalized;
-
-            ballRb.linearVelocity = fixedDirection * speed;
+            velocity = new Vector2(
+                randomX,
+                velocity.y
+            ).normalized * speed;
         }
+
+       
+        if (Mathf.Abs(velocity.y) < minHorizontalSpeed)
+        {
+            float randomY = Random.Range(-1f, 1f);
+
+            velocity = new Vector2(
+                velocity.x,
+                randomY
+            ).normalized * speed;
+        }
+
+        ballRb.linearVelocity = velocity;
+    }
+
+    public void ResetBall()
+    {
+        launched = false;
+        ballRb.linearVelocity = Vector2.zero;
     }
 
 

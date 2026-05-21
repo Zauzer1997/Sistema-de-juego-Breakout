@@ -35,14 +35,27 @@ public class Block : MonoBehaviour
 
     private void TakeDamage(int damange)
     {
+        GameManager.Instance.AddScore(GetHitScore());
+
         currentHealth -= damange;
         if (currentHealth <= 0)
         {
+            GameManager.Instance.AddScore(GetDestroyScore());
+
             Destroy(gameObject);
             return;
         }
 
         UpdateColor();
+    }
+
+    private int GetHitScore()
+    {
+        return maxHealth * 10;
+    }
+    private int GetDestroyScore()
+    {
+        return maxHealth * 50;
     }
 
     private void UpdateColor()
