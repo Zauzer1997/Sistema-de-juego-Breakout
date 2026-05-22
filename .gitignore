@@ -73,3 +73,20 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# =========================
+# ASP.NET CORE API (BreakoutAPI)
+# =========================
+
+# Build output
+BreakoutAPI/bin/
+BreakoutAPI/obj/
+
+# Visual Studio / Rider cache (API side)
+**/.vs/
+
+# Publish output (si haces deploy después)
+BreakoutAPI/publish/
+
+# User secrets / local config (MUY importante)
+BreakoutAPI/appsettings.Development.json
