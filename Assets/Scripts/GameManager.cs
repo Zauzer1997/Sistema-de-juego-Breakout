@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour
         // 👉 Reiniciar al menú con ESPACIO
         if (isGameOver && Input.GetKeyDown(KeyCode.Space))
         {
-            ReturnToMainMenu();
+            AdvanceToTop10();
         }
     }
 
@@ -127,9 +127,9 @@ public class GameManager : MonoBehaviour
         yield return scoreAPI.SaveScore(playerName, score);
     }
 
-    private void ReturnToMainMenu()
+    private void AdvanceToTop10()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu");
+        SceneManager.LoadScene("Top10");
     }
 }

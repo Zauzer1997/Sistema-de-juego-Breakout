@@ -20,7 +20,7 @@ public class ScoresController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> SaveScore(Score score)
     {
-        /
+        
         var topScores = await _context.Scores
             .OrderByDescending(s => s.ScoreValue)
             .Take(10)
