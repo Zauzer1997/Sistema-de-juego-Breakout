@@ -1,70 +1,89 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    [Header("UI")]
     [SerializeField] private GameObject gameOverUI;
-    [SerializeField] private Ball_Controller ball;
     [SerializeField] private TMP_Text livesText;
     [SerializeField] private TMP_Text scoreText;
+
+    [Header("References")]
+    [SerializeField] private Ball_Controller ball;
+    [SerializeField] private ScoreAPI scoreAPI;
+
+    [Header("Gameplay")]
     [SerializeField] private int score = 0;
-    [SerializeField] private int extraLifeEvery = 10000;
-    private int nextExtraLife;
-
     [SerializeField] private int lives = 3;
+    [SerializeField] private int extraLifeEvery = 10000;
 
-    private bool isGameover = false;
+    private int nextExtraLife;
+    private bool isGameOver = false;
+
+    public int Score => score;
+
     void Awake()
     {
-        Instance = this;
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     void Start()
     {
         nextExtraLife = extraLifeEvery;
+
+        UpdateScoreUI();
         UpdateLivesUI();
+
+        gameOverUI.SetActive(false);
+    }
+
+    void Update()
+    {
+        // 👉 Reiniciar al menú con ESPACIO
+        if (isGameOver && Input.GetKeyDown(KeyCode.Space))
+        {
+            ReturnToMainMenu();
+        }
     }
 
     public void AddScore(int amount)
     {
+        if (isGameOver) return;
+
         score += amount;
+
         UpdateScoreUI();
         CheckExtraLife();
     }
 
-
     private void CheckExtraLife()
     {
-        if(score >= nextExtraLife)
+        if (score >= nextExtraLife)
         {
             lives++;
-            UpdateLivesUI();
-            Debug.Log("EXTRA LIFE!!!");
             nextExtraLife += extraLifeEvery;
+
+            UpdateLivesUI();
         }
-    }
-
-    private void UpdateScoreUI()
-    {
-        scoreText.text = "Score:" + score;
-    }
-
-    public void GameOver()
-    {
-        if (isGameover) { return; }
-
-        isGameover = true;
-        gameOverUI.SetActive(true);
-        Time.timeScale = 0f;
     }
 
     public void LoseLife()
     {
-        if (isGameover) { return; }
+        if (isGameOver) return;
+
         lives--;
+
         UpdateLivesUI();
 
         if (lives <= 0)
@@ -75,26 +94,42 @@ public class GameManager : MonoBehaviour
         {
             ball.ResetBall();
         }
-
     }
 
-    public void UpdateLivesUI()
+    private void UpdateScoreUI()
     {
-        livesText.text = "Lives: " + lives;
+        if (scoreText != null)
+            scoreText.text = "Score: " + score;
     }
 
-    private void Update()
+    private void UpdateLivesUI()
     {
-        if(isGameover && Input.GetKeyDown(KeyCode.R))
-        {
-            RestartGame();
-        }
+        if (livesText != null)
+            livesText.text = "Lives: " + lives;
     }
 
-    private void RestartGame()
+    public void GameOver()
+    {
+        if (isGameOver) return;
+
+        isGameOver = true;
+
+        Time.timeScale = 0f;
+        gameOverUI.SetActive(true);
+
+        StartCoroutine(SendScoreToAPI());
+    }
+
+    private IEnumerator SendScoreToAPI()
+    {
+        string playerName = PlayerPrefs.GetString("PlayerName", "PLAYER");
+
+        yield return scoreAPI.SaveScore(playerName, score);
+    }
+
+    private void ReturnToMainMenu()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-
+        SceneManager.LoadScene("MainMenu");
     }
 }
