@@ -30,8 +30,21 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Player_Controller playerController;
     [SerializeField] private Ball_Controller ballController;
 
-    private Rigidbody2D ballRb;
+    [Header("Screen Shake")]
+    [SerializeField] private Transform cameraTransform;
+    [SerializeField] private float shakeDuration = 0.25f;
+    [SerializeField] private float shakeMagnitude = 0.15f;
 
+    [Header("Game Over Music")]
+    [SerializeField] private AudioSource musicSource;
+    [SerializeField] private AudioClip gameOverMusic;
+
+    [Header("Life Loss SFX")]
+    [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioClip loseLifeSFX;
+
+    private Vector3 originalCamPos;
+    private Rigidbody2D ballRb;
     private int nextExtraLife;
     private bool isGameOver = false;
 
@@ -39,27 +52,18 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
     }
 
     void Start()
     {
         nextExtraLife = extraLifeEvery;
-
         UpdateScoreUI();
         UpdateLivesUI();
-
         gameOverUI.SetActive(false);
-
         ballRb = ballController.GetComponent<Rigidbody2D>();
-
+        originalCamPos = cameraTransform.localPosition;
         StartCoroutine(StartGameSequence());
     }
 
@@ -74,41 +78,27 @@ public class GameManager : MonoBehaviour
     private IEnumerator StartGameSequence()
     {
         playerController.enabled = false;
-
         Rigidbody2D rb = ballController.GetComponent<Rigidbody2D>();
         rb.linearVelocity = Vector2.zero;
         rb.angularVelocity = 0f;
         rb.simulated = false;
-
-        ballController.transform.position =
-            playerController.transform.position + new Vector3(0f, 0.6f, 0f);
-
+        ballController.transform.position = playerController.transform.position + new Vector3(0f, 0.6f, 0f);
         readyText.gameObject.SetActive(true);
         readyText.text = "READY?";
         readyText.enabled = true;
-
         audioSource.PlayOneShot(startJingle);
-
-        
         yield return StartCoroutine(BlinkReadyText());
-
-        
         yield return new WaitForSeconds(0.3f);
-
         readyText.gameObject.SetActive(false);
-
         rb.simulated = true;
         playerController.enabled = true;
-
         ballController.ResetBall();
     }
 
     public void AddScore(int amount)
     {
         if (isGameOver) return;
-
         score += amount;
-
         UpdateScoreUI();
         CheckExtraLife();
     }
@@ -119,7 +109,6 @@ public class GameManager : MonoBehaviour
         {
             lives++;
             nextExtraLife += extraLifeEvery;
-
             UpdateLivesUI();
         }
     }
@@ -127,10 +116,15 @@ public class GameManager : MonoBehaviour
     public void LoseLife()
     {
         if (isGameOver) return;
-
         lives--;
-
         UpdateLivesUI();
+
+        if (sfxSource != null && loseLifeSFX != null)
+        {
+            sfxSource.PlayOneShot(loseLifeSFX);
+        }
+
+        StartCoroutine(LifeFeedback());
 
         if (lives <= 0)
         {
@@ -142,27 +136,32 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private IEnumerator LifeFeedback()
+    {
+        Time.timeScale = 0.3f;
+        yield return new WaitForSecondsRealtime(0.08f);
+        Time.timeScale = 1f;
+        yield return StartCoroutine(ShakeCamera());
+    }
+
+    private IEnumerator ShakeCamera()
+    {
+        float elapsed = 0f;
+        while (elapsed < shakeDuration)
+        {
+            float x = Random.Range(-1f, 1f) * shakeMagnitude;
+            float y = Random.Range(-1f, 1f) * shakeMagnitude;
+            cameraTransform.localPosition = originalCamPos + new Vector3(x, y, 0);
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        cameraTransform.localPosition = originalCamPos;
+    }
+
     private void UpdateScoreUI()
     {
         if (scoreText != null)
             scoreText.text = "Score: " + score;
-    }
-
-    private IEnumerator BlinkReadyText()
-    {
-        float blinkSpeed = 0.25f;
-        float elapsed = 0f;
-
-        while (elapsed < startJingle.length - 0.7f)
-        {
-            readyText.enabled = !readyText.enabled;
-
-            yield return new WaitForSeconds(blinkSpeed);
-            elapsed += blinkSpeed;
-        }
-
-        readyText.enabled = true;
-        readyText.text = "START!";
     }
 
     private void UpdateLivesUI()
@@ -171,15 +170,34 @@ public class GameManager : MonoBehaviour
             livesText.text = "Lives: " + lives;
     }
 
+    private IEnumerator BlinkReadyText()
+    {
+        float blinkSpeed = 0.25f;
+        float elapsed = 0f;
+        while (elapsed < startJingle.length - 0.7f)
+        {
+            readyText.enabled = !readyText.enabled;
+            yield return new WaitForSeconds(blinkSpeed);
+            elapsed += blinkSpeed;
+        }
+        readyText.enabled = true;
+        readyText.text = "START!";
+    }
+
     public void GameOver()
     {
         if (isGameOver) return;
-
         isGameOver = true;
-
         Time.timeScale = 0f;
-
         gameOverUI.SetActive(true);
+
+        if (musicSource != null && gameOverMusic != null)
+        {
+            musicSource.Stop();
+            musicSource.clip = gameOverMusic;
+            musicSource.loop = false;
+            musicSource.Play();
+        }
 
         StartCoroutine(SendScoreToAPI());
     }
@@ -187,14 +205,12 @@ public class GameManager : MonoBehaviour
     private IEnumerator SendScoreToAPI()
     {
         string playerName = PlayerPrefs.GetString("PlayerName", "PLAYER");
-
         yield return scoreAPI.SaveScore(playerName, score);
     }
 
     private void AdvanceToTop10()
     {
         Time.timeScale = 1f;
-
         SceneManager.LoadScene("Top10");
     }
 }
