@@ -1,0 +1,35 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+
+# Logs
+*.log
+
+# Publish output
+publish/
+out/
+
+# ASP.NET Core secrets
+secrets.json
+appsettings.Development.json
+
+# Rider / JetBrains
+.idea/
+
+# macOS / system files
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# NuGet
+*.nupkg

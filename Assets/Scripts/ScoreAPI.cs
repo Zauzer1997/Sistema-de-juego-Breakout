@@ -6,7 +6,7 @@ using System.Text;
 public class ScoreAPI : MonoBehaviour
 {
     private const string API_URL =
-        "http://127.0.0.1:5299/api/scores";
+        "http://localhost:5000/api/scores";
 
     public IEnumerator SaveScore(string playerName, int score)
     {

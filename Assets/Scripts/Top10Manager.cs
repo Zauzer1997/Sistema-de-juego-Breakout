@@ -7,7 +7,7 @@ public class Top10Manager : MonoBehaviour
 {
     [SerializeField] private TMP_Text scoresText;
 
-    private string url = "http://127.0.0.1:5299/api/scores/top10";
+    private string url = "http://localhost:5000/api/scores/top10";
 
     void Start()
     {

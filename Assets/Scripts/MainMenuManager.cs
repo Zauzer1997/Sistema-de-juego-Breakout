@@ -10,7 +10,7 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private TMP_InputField playerNameInput;
     [SerializeField] private TMP_Text highscoreText;
 
-    private string highscoreURL = "http://127.0.0.1:5299/api/scores/highscore";
+    private string highscoreURL = "http://localhost:5000/api/scores/highscore";
 
     void Start()
     {

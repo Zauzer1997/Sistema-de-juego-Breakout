@@ -90,3 +90,28 @@ BreakoutAPI/publish/
 
 # User secrets / local config (MUY importante)
 BreakoutAPI/appsettings.Development.json
+
+
+# =========================
+# FINAL BUILDS / DELIVERABLES
+# =========================
+
+# Windows executable builds
+*.exe
+
+# Compressed game builds
+*.zip
+*.rar
+*.7z
+
+# Final delivery folders
+EntregaFinal/
+Entrega Final/
+FinalBuild/
+GameBuild/
+Dist/
+Release/
+
+# Unity standalone build folders
+StandaloneWindows64/
+StandaloneWindows/
